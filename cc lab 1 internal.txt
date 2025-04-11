@@ -161,6 +161,10 @@ Task 2: Create Two Subnets (Public and Private)
 Task 3: Launch 2 EC2 Instances one in Public subnet and One in Private subnet
 Task 4: Create Internet Gateway 
 Task 5: Create Route Tables and associate IGW
+
+- routes > add IG
+- subnet association > add public subnet
+
 Task 6: Access EC2 Launched in Private Subnet Via EC2 Launched in Public Subnet
 
 
@@ -173,6 +177,41 @@ Task 4: Create Internet Gateway
 Task 5: Create Route Tables and associate IGW
 Task 6: Create NAT Gateway
 Task 7: Access Internet from EC2 Launched in Private Subnet
+
+
+🔹 Task 6: Create NAT Gateway
+Go to Elastic IPs > Allocate Elastic IP
+
+Go to NAT Gateways > Create NAT Gateway
+
+Name: MyNATGateway
+
+Subnet: PublicSubnet (AZ 1a)
+
+Elastic IP: Select the one you just allocated
+
+Wait for the NAT Gateway to become available
+
+🔹 Task 7: Setup Private Route Table
+Go to Route Tables > Create Route Table
+
+Name: PrivateRouteTable
+
+VPC: MyVPC
+
+Edit Routes:
+
+Destination: 0.0.0.0/0
+
+Target: NAT Gateway (MyNATGateway)
+
+Associate this route table with PrivateSubnet (AZ 1b)
+
+
+
+
+
+
 
 
 Exp 7: Create your First AWS S3 Bucket and Upload Content to Bucket and Manage their Access and Create Static Website using AWS S3
