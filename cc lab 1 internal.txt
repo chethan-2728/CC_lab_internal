@@ -1,0 +1,199 @@
+Exp 1: Working with EC2 Instance.
+
+Task 1: Launch an EC2 Instance using Ubuntu OS Connect to the Instance using SSH and connecting it with ec2 direct connect 
+
+- for ssh if doing first time then check for chmod cmd above ssh cmd there
+- to the left of shh there is EC2 instance connect - click that and just click connect without changing anything
+
+Task 2: Install Nginx Server on Ec2 Instance Connect to the Nginx webpage using PublicIP
+- follow task1 and 
+ubuntu  - sudo apt update
+	- sudo apt install nginx -y
+	- for starting and enabling nginx - sudo systemctl start nginx
+					  - sudo systemctl enable nginx
+	- for allowing http traffic in security group - click on instcance id->security->click on security groups link->edit inbound rules -> HTTP, ipv4 anywhere, port 80 and save
+	- go to ec2 dashboard by clicking instance id and copy ipv4 and paste in browser **(IMP)"use only http" by default it will be https and nginx will be visible
+
+Task 3: Launch a New Instance using Amazon Linux Connect to the Instance using Putty
+
+- create normally and use .pem only
+- download and install putty and if puttygen installed automatically then install that also - download .exe file in alternative binary files
+- open puttygen.exe by searching in windows search bar
+- load the .pem file and change from .ppk to all files below
+- save private key
+
+- open putty
+- go to ssh >auth > credentials and now browse and upload .ppk file 
+- session > enter ec2-user@<public ip> or simple enter the public ip and enter ec2-user when asked for " login as " and enter open
+- it will automatically opens the terminal
+
+Task 4: Launch an Ec2 Instance using Windows OS Connect to the Instance using RDP 
+
+- instance creation is normal 
+- go to rdp client
+- click get password 
+- upload the same .pem file used for key-pair in instance creation
+- decrypt password and copy the password
+
+- either use connect by using by downloading the rdp file or use the inbuit rdp app
+- open the downloaded rdp file and enter the decrypted password
+- press connect and paste the excrypted password
+- allow certificate and wait for some time for the machine to and u r connected.
+
+
+
+Exp 2:  Deploy a front-end application using Docker.
+
+Task 1: Install Docker on an EC2 instance.
+
+- create an instance using ubuntu OS and connect to the instance with ssh
+- sudo apt update
+- sudo apt install docker.io -y
+- docker --version
+
+Task 2: Clone the front-end application, write the Dockerfile build the image.
+			Use : tinyurl.com/demokmit3
+
+- use task1
+- clone the repo and cd to the folder
+- sudo usermod -aG docker $USER
+- then either logout and login or enter newgrp docker 
+- as it already contains a Dockerfile we just need to build the image
+- building image - docker build -t <imagename> .
+- run container - docker run -d -p 80:80 frontend-app
+- docker ps for checking whether the container is running or not.
+- go to browser and do http://<public ip>
+
+- If you are not able to see the app then one of the reason it inbound rules and other reason is wrong port number like it is not 80:80, it might be something else
+- so to check it - docker exec -it <container id> sh - apt update && apt install -y iproute2 - ss -tuln - here you will get the port number like 0.0.0.0:3000
+
+- so change to that port number and before that stop and rm the container
+-  docker run -d -p 80:3000 frontend-app
+- http://<public ip>
+
+Task 3: Create a Docker container with a front-end application.
+
+- docker run -d -p 80:80 <image_name>
+
+Task 4: Configure security groups to allow web traffic.
+
+- HTTP, tcp, 80, 0.0.0.0/0
+
+
+
+Exp 3: Create and configure storage services using Amazon EBS
+
+Task 1: Launch an Ec2 Instance check the volume and modify the size of volume
+
+- after creation > ec2 dashboard > storage > click on the default present there > action > modify volume >change to new volume and click modify
+ 
+Task 2: Create a new Volume in the same availability zone and attach it to EC2 instance 
+             -- Mount the new volume and
+             -- Create a file (with your rollno.txt)
+
+Steps - go to volumes > create volume > put required size > set to the ec2 instance AZ >create volume
+- select that extra ebs and clic action > attach volume > select instance > select device name like /dev/sdf (anything from sdf to sdp) > attach volume
+- after connecting using ssh
+- sudo su
+- fdisk -l - check for the disk where we kept out storage
+- for the first time - mkfs /dev/xvd[s-p] - the disk you have given
+- mkdir /mnt/test
+- mount /dev/xvd[s-p] /mnt/test
+- cd /mnt/test
+- nano <rollno>.txt
+- cat input.txt
+
+Task 3: Detach the new Volume from the EC2 Instance and try to attach it to a new EC2 Instance as well as check the files are present
+
+- detach volume and attach to another ec2 instance within the same AZ
+- then follow the same steps exept mkfs and nano present in task 2
+
+Task 4: Create a snapshot, copy it across regions, and attach the new volume to an EC2 instance in the new region.
+
+- go to volumes > select a volume > actions > create snapshot > create
+- go to snapshots > select snapshot > copy snapshot > select destination region as us-west-2 >create
+- change the location from virginia to us-west-2 (Oregon)
+- select the copied snapshot > actions > create volume from snapshot > create volume
+
+- launch ec2 instance and attach the volume to instance
+- follow all the steps except mkfs and nano
+- the file created in another region will be present
+
+
+
+
+Exp 4:  Amazon Elastic File System
+
+Task 1: Create Two Security Groups
+           --- One for EC2 - inbound rule change - ssh, ipv4, 0.0.0.0/0 - no change in outbound rule
+           --- One for EFS - inbound rule change - NFS, custom, give sg of ec2
+
+Task 2: Launch One EC2 Instance and Mount EFS -- Launch only Amazon OS
+
+- things done differently are - edit network setting and select subnet
+- select existing security group and select ec2-sg
+
+Task 3: Create a directory and a file with your rollno under the directory
+
+commands 
+- sudo yum -y install amazon-efs-utils
+- sudo mkdir /<name>
+- sudo chown -R ec2-user /<name>
+- cd /<name>
+- create file
+- open efs console > attach > mount via DNS > copy the 2nd command which is long 
+- give the directory name <name> at the last of the command
+
+Task 4: Launch One more EC2 and mount the same EFS
+
+- do the same thing done in task 3
+
+Task 5: Access the Directory and File created from the First EC2 Instance 
+
+- you can access the same files in both instance terminals.
+
+
+
+Exp 5: Amazon VPC
+
+Task 1: Creation of VPC
+Task 2: Create Two Subnets (Public and Private) 
+Task 3: Launch 2 EC2 Instances one in Public subnet and One in Private subnet
+Task 4: Create Internet Gateway 
+Task 5: Create Route Tables and associate IGW
+Task 6: Access EC2 Launched in Private Subnet Via EC2 Launched in Public Subnet
+
+
+Exp 6: Amazon VPC NAT Gateway
+
+Task 1: Create VPC
+Task 2: Create Two Subnets (Public and Private) 
+Task 3: Launch 2 EC2 Instances one in public subnet and one in Private subnet
+Task 4: Create Internet Gateway 
+Task 5: Create Route Tables and associate IGW
+Task 6: Create NAT Gateway
+Task 7: Access Internet from EC2 Launched in Private Subnet
+
+
+Exp 7: Create your First AWS S3 Bucket and Upload Content to Bucket and Manage their Access and Create Static Website using AWS S3
+
+Task 1: Create an S3 bucket.
+Task 2: Upload files (HTML, images).
+Task 3: Set proper permissions.
+Task 4: Enable static website hosting.
+
+
+Exp 8: Setting up an AWS Lambda function to trigger whenever an object is uploaded to an S3 bucket and update a DynamoDB table
+
+Task 1: Create a Lambda function.
+			Use: tinyurl.com/kmitdemocode
+Task 2: Set up API Gateway to invoke Lambda from the s3.
+Task 3: Update the DynamoDB.
+
+- create a s3 bucket with acls enabled and disable block public access and enable versioning and create bucket
+- create dynamodb by > new table > table name > partition key same as in json file
+- create lambda function > new function > function name > runtime as python > execution role > existing role > LabRole > create function
+- add source > select s3 and select the created s3 storage
+- paste the code in the below section > click test > give name to the test > deploy
+- go to s3 and upload file and check in dynamodb >explore items after refreshing it.
+
